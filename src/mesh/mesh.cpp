@@ -1,8 +1,7 @@
 #include "parkour/mesh/mesh.h"
 
-Mesh::Mesh(Shader* shader, std::vector<Vertex> vertex) {
+Mesh::Mesh(std::vector<Vertex> vertex) {
     this->vertex = vertex;
-    this->shader = shader;
 
     setup();
 }
@@ -21,7 +20,7 @@ void Mesh::setup() {
     glEnableVertexAttribArray(1);
 }
 
-void Mesh::draw() {
+void Mesh::draw(Shader* shader) {
     shader->use();
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, vertex.size());
