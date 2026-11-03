@@ -6,19 +6,23 @@
 #include "parkour/mesh/mesh.h"
 #include <iostream>
 #include <vector>
+#include <memory>
 
 class Window {
     private:
     GLFWwindow* window = nullptr;
-    Shader* shader;
-    Mesh* simpleMesh;
+    std::unique_ptr<Shader> shader;
+    std::unique_ptr<Mesh> simpleMesh;
 
     const int SCR_WIDTH = 640, SCR_HEIGHT = 480;
+    int width = SCR_WIDTH, height = SCR_HEIGHT;
 
-    float deltaTime, lastFrame;
+    float deltaTime = 0.0f, lastFrame = 0.0f;
 
     static void framebufferSizeCallback(GLFWwindow* /*window*/, int width, int height) {
         glViewport(0, 0, width, height);
+        width = width;
+        height = height;
     }
 
     void proccessInput();
@@ -26,6 +30,7 @@ class Window {
     public:
     Window();
 
+    void transform();
     void draw();
     void run();
 

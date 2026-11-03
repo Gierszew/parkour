@@ -30,7 +30,7 @@ Window::Window() {
 
     glEnable(GL_DEPTH_TEST);
 
-    shader = new Shader("shaders/simple.vs", "shaders/simple.frag");
+    shader = std::make_unique<Shader>("shaders/simple.vs", "shaders/simple.frag");
     std::vector<Vertex> cube = {
     // FRONT (+Z) — czerwony
     {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}},
@@ -80,11 +80,20 @@ Window::Window() {
     {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 1.0f}},
     {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 1.0f}},
 };
-    simpleMesh = new Mesh(cube);
+    simpleMesh = std::make_unique<Mesh>(cube);
+}
+
+void Window::transform() {
+    glm::mat4 modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -3.0f));
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), ((float)width) / height, 0.1f, 100.0f);
+
+    shader->setMat4("u_modelTransformMatrix", modelTransformMatrix);
+    shader->setMat4("u_projectionMatrix", projectionMatrix);
 }
 
 void Window::draw() {
-    simpleMesh->draw(shader);
+    transform();
+    simpleMesh->draw(shader.get());
 }
 
 void Window::run() {
