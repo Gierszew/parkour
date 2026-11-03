@@ -1,8 +1,18 @@
 #include "parkour/window/window.h"
 
-void Window::proccessInput() {
+void Window::processInput() {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    float velocity = camera.MovementSpeed * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
 Window::Window() {
@@ -20,7 +30,12 @@ Window::Window() {
     }
 
     glfwMakeContextCurrent(window);
+    glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // init glad
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -81,14 +96,17 @@ Window::Window() {
     {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 1.0f}},
 };
     simpleMesh = std::make_unique<Mesh>(cube);
+    camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f));
 }
 
 void Window::transform() {
-    glm::mat4 modelTransformMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -3.0f));
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), ((float)width) / height, 0.1f, 100.0f);
+    glm::mat4 modelTransformMatrix = glm::mat4(1.0f);
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 100.0f);
+    glm::mat4 viewMatrix = camera.GetViewMatrix();
 
     shader->setMat4("u_modelTransformMatrix", modelTransformMatrix);
     shader->setMat4("u_projectionMatrix", projectionMatrix);
+    shader->setMat4("u_viewMatrix", viewMatrix);
 }
 
 void Window::draw() {
@@ -101,7 +119,7 @@ void Window::run() {
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        proccessInput();
+        processInput();
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         draw();
@@ -111,6 +129,7 @@ void Window::run() {
 }
 
 Window::~Window() {
+    glfwSetWindowUserPointer(window, nullptr);
     if (window) glfwDestroyWindow(window);
     glfwTerminate();
 }

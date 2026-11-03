@@ -4,13 +4,12 @@ layout (location = 1) in vec3 aColor;
 
 uniform mat4 u_modelTransformMatrix;
 uniform mat4 u_projectionMatrix;
+uniform mat4 u_viewMatrix;
 
 out vec3 ourColor;
 
 void main()
 {
-    vec4 model = vec4(aPos, 1.0);
-    vec4 newPosition = u_modelTransformMatrix * model;
-    gl_Position = u_projectionMatrix * newPosition;
+    gl_Position = u_projectionMatrix * u_viewMatrix * u_modelTransformMatrix * vec4(aPos, 1.0f);
     ourColor = aColor;
 }
