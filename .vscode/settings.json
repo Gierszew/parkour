@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "/home/gierszew/dont-look/productive/opengl/parkour/parkour/glm"
+    "cmake.sourceDirectory": "/home/gierszew/dont-look/productive/opengl/parkour/parkour/glm",
+    "C_Cpp.errorSquiggles": "enabled"
 }

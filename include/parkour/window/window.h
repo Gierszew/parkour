@@ -8,6 +8,9 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include "imgui/imgui.h"
+#include <imgui/backends/imgui_impl_glfw.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
 
 class Window {
     private:
@@ -17,8 +20,12 @@ class Window {
     Camera camera;
 
     const int SCR_WIDTH = 640, SCR_HEIGHT = 480;
+
     float lastX = SCR_WIDTH / 2.0f, lastY = SCR_HEIGHT / 2.0f;
+
     bool firstMouse = true;
+    bool cursorLocked = true;
+
     int width = SCR_WIDTH, height = SCR_HEIGHT;
 
     float deltaTime = 0.0f, lastFrame = 0.0f;
@@ -39,15 +46,15 @@ class Window {
         float xpos = static_cast<float>(xposIn);
         float ypos = static_cast<float>(yposIn);
 
-        if (self->firstMouse)
+        if (self->firstMouse || !self->cursorLocked)
         {
             self->lastX = xpos;
             self->lastY = ypos;
             self->firstMouse = false;
         }
     
-        float xoffset = xpos - self->lastX;
-        float yoffset = self->lastY - ypos;
+        float xoffset = xpos - self->lastX;     // inaczej delta X
+        float yoffset = self->lastY - ypos;     // inaczej delta Y
     
         self->lastX = xpos;
         self->lastY = ypos;
@@ -55,9 +62,10 @@ class Window {
         self->camera.ProcessMouseMovement(xoffset, yoffset);
     }
 
-    static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    static void scroll_callback(GLFWwindow* window, double /*xoffset*/, double yoffset) {
         auto* self = static_cast<Window*>(glfwGetWindowUserPointer(window));
         if (!self) return;
+        if (ImGui::GetIO().WantCaptureMouse) return;
 
         self->camera.ProcessMouseScroll(static_cast<float>(yoffset));
     }
@@ -70,6 +78,7 @@ class Window {
     void transform();
     void draw();
     void run();
+    void debug();
 
     ~Window();
 };

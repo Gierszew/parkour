@@ -1,10 +1,17 @@
 #include "parkour/window/window.h"
 
 void Window::processInput() {
+    static bool ctrlPrev = false;
+    bool ctrlNow = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
+    if (ctrlNow && !ctrlPrev) {
+        cursorLocked = !cursorLocked;
+        firstMouse = true;
+    }
+    ctrlPrev = ctrlNow;
+
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    float velocity = camera.MovementSpeed * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -35,7 +42,7 @@ Window::Window() {
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
     // init glad
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -44,6 +51,16 @@ Window::Window() {
     }
 
     glEnable(GL_DEPTH_TEST);
+
+    // glad and gl fully initialized
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
 
     shader = std::make_unique<Shader>("shaders/simple.vs", "shaders/simple.frag");
     std::vector<Vertex> cube = {
@@ -123,12 +140,35 @@ void Window::run() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         draw();
+        debug();
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 }
 
+void Window::debug() {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        // --- Twoje UI ---
+        ImGui::Begin("Debug");
+        ImGui::Text("FPS: %.1f", 1.0f / deltaTime);
+        ImGui::Text("Camera pos: (%.2f, %.2f, %.2f)",
+                    camera.Position.x, camera.Position.y, camera.Position.z);
+        ImGui::SliderFloat("Zoom", &camera.Zoom, 1.0f, 45.0f);
+        ImGui::End();
+
+        // --- ImGui: render ---
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
 Window::~Window() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
     glfwSetWindowUserPointer(window, nullptr);
     if (window) glfwDestroyWindow(window);
     glfwTerminate();

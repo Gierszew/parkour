@@ -40,9 +40,10 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime) {
 void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch) {
     xoffset *= MouseSensitivity;
     yoffset *= MouseSensitivity;
-    Yaw   += xoffset;
-    Pitch += yoffset;
+    Yaw   += xoffset;           // rotacja w X (wedlug Y)
+    Pitch += yoffset;           // rotacja w Y (wedlug X)
 
+    // zapobiegaj gimbal lock
     if (constrainPitch)
     {
         if (Pitch > 89.0f) Pitch = 89.0f;
