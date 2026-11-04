@@ -24,7 +24,7 @@ class Window {
     float lastX = SCR_WIDTH / 2.0f, lastY = SCR_HEIGHT / 2.0f;
 
     bool firstMouse = true;
-    bool cursorLocked = true;
+    bool cursorLocked = false;
 
     int width = SCR_WIDTH, height = SCR_HEIGHT;
 
@@ -46,7 +46,7 @@ class Window {
         float xpos = static_cast<float>(xposIn);
         float ypos = static_cast<float>(yposIn);
 
-        if (self->firstMouse || !self->cursorLocked)
+        if (self->firstMouse || self->cursorLocked)
         {
             self->lastX = xpos;
             self->lastY = ypos;

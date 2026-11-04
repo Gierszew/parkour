@@ -5,6 +5,7 @@ void Window::processInput() {
     bool ctrlNow = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
     if (ctrlNow && !ctrlPrev) {
         cursorLocked = !cursorLocked;
+        glfwSetInputMode(window, GLFW_CURSOR, cursorLocked? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
         firstMouse = true;
     }
     ctrlPrev = ctrlNow;
@@ -42,7 +43,7 @@ Window::Window() {
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // init glad
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -56,7 +57,6 @@ Window::Window() {
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
     
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
